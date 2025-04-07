@@ -1,0 +1,780 @@
+{
+  "C:\\Users\\puppa\\All_Git_Files\\basiclambdadeploy\\serverless.yml": {
+    "versionFramework": "4.11.1",
+    "servicePath": "C:\\Users\\puppa\\All_Git_Files\\basiclambdadeploy\\serverless.yml",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "org": "universityofnorthtexas1147",
+      "service": "login-lambda-new",
+      "provider": {
+        "name": "aws",
+        "runtime": "python3.9",
+        "region": "us-east-1",
+        "stage": "dev",
+        "versionFunctions": true,
+        "compiledCloudFormationTemplate": {
+          "AWSTemplateFormatVersion": "2010-09-09",
+          "Description": "The AWS CloudFormation template for this Serverless application",
+          "Resources": {
+            "AppLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/login-lambda-new-dev-app"
+              }
+            },
+            "IamRoleLambdaExecution": {
+              "Type": "AWS::IAM::Role",
+              "Properties": {
+                "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Service": [
+                          "lambda.amazonaws.com"
+                        ]
+                      },
+                      "Action": [
+                        "sts:AssumeRole"
+                      ]
+                    }
+                  ]
+                },
+                "Policies": [
+                  {
+                    "PolicyName": {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          "login-lambda-new",
+                          "dev",
+                          "lambda"
+                        ]
+                      ]
+                    },
+                    "PolicyDocument": {
+                      "Version": "2012-10-17",
+                      "Statement": [
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:CreateLogStream",
+                            "logs:CreateLogGroup",
+                            "logs:TagResource"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/login-lambda-new-dev*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:PutLogEvents"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/login-lambda-new-dev*:*:*"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "Path": "/",
+                "RoleName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "login-lambda-new",
+                      "dev",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "lambdaRole"
+                    ]
+                  ]
+                }
+              }
+            },
+            "AppLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-4b695180-4303",
+                  "S3Key": "serverless/login-lambda-new/dev/1743913548638-2025-04-06T04:25:48.638Z/login-lambda-new.zip"
+                },
+                "Handler": "handler.handler",
+                "Runtime": "python3.9",
+                "FunctionName": "login-lambda-new-dev-app",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "AppLogGroup"
+              ]
+            },
+            "AppLambdaVersionwbeYqFPWHoYLLZI9t9u1wKpfVpq5R0wgncbkjNnw8": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "AppLambdaFunction"
+                },
+                "CodeSha256": "GIY30f4ud9O0oL2FcivntKXdjHdI81xZyYd3QlojlMc="
+              }
+            },
+            "ApiGatewayRestApi": {
+              "Type": "AWS::ApiGateway::RestApi",
+              "Properties": {
+                "Name": "dev-login-lambda-new",
+                "EndpointConfiguration": {
+                  "Types": [
+                    "EDGE"
+                  ]
+                },
+                "Policy": ""
+              }
+            },
+            "ApiGatewayResourceProxyVar": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Fn::GetAtt": [
+                    "ApiGatewayRestApi",
+                    "RootResourceId"
+                  ]
+                },
+                "PathPart": "{proxy+}",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayMethodAny": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "ANY",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Fn::GetAtt": [
+                    "ApiGatewayRestApi",
+                    "RootResourceId"
+                  ]
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "AppLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "AppLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayMethodProxyVarAny": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "ANY",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourceProxyVar"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "AppLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "AppLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayDeployment1743913540252": {
+              "Type": "AWS::ApiGateway::Deployment",
+              "Properties": {
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "StageName": "dev"
+              },
+              "DependsOn": [
+                "ApiGatewayMethodAny",
+                "ApiGatewayMethodProxyVarAny"
+              ]
+            },
+            "AppLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "AppLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            }
+          },
+          "Outputs": {
+            "ServerlessDeploymentBucketName": {
+              "Value": "serverless-framework-deployments-us-east-1-4b695180-4303",
+              "Export": {
+                "Name": "sls-login-lambda-new-dev-ServerlessDeploymentBucketName"
+              }
+            },
+            "AppLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "AppLambdaVersionwbeYqFPWHoYLLZI9t9u1wKpfVpq5R0wgncbkjNnw8"
+              },
+              "Export": {
+                "Name": "sls-login-lambda-new-dev-AppLambdaFunctionQualifiedArn"
+              }
+            },
+            "ServiceEndpoint": {
+              "Description": "URL of the service endpoint",
+              "Value": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "https://",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    ".execute-api.",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ".",
+                    {
+                      "Ref": "AWS::URLSuffix"
+                    },
+                    "/dev"
+                  ]
+                ]
+              },
+              "Export": {
+                "Name": "sls-login-lambda-new-dev-ServiceEndpoint"
+              }
+            }
+          }
+        },
+        "vpc": {}
+      },
+      "functions": {
+        "app": {
+          "handler": "handler.handler",
+          "events": [
+            {
+              "http": "ANY /"
+            },
+            {
+              "http": "ANY /{proxy+}"
+            }
+          ],
+          "name": "login-lambda-new-dev-app",
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "python3.9",
+          "vpc": {},
+          "versionLogicalId": "AppLambdaVersionwbeYqFPWHoYLLZI9t9u1wKpfVpq5R0wgncbkjNnw8"
+        }
+      },
+      "plugins": [
+        "serverless-python-requirements",
+        "serverless-wsgi"
+      ],
+      "custom": {
+        "wsgi": {
+          "app": "handler.app"
+        },
+        "pythonRequirements": {
+          "pythonBin": "python3.9"
+        }
+      },
+      "package": {
+        "exclude": [
+          ".serverless/**",
+          "node_modules/**",
+          "venv/**"
+        ],
+        "artifactsS3KeyDirname": "serverless/login-lambda-new/dev/code-artifacts",
+        "deploymentBucket": "serverless-framework-deployments-us-east-1-4b695180-4303",
+        "patterns": [
+          "wsgi_handler.py",
+          "serverless_wsgi.py",
+          ".serverless-wsgi"
+        ],
+        "artifact": "C:\\Users\\puppa\\All_Git_Files\\basiclambdadeploy\\.serverless\\login-lambda-new.zip",
+        "artifactDirectoryName": "serverless/login-lambda-new/dev/1743913548638-2025-04-06T04:25:48.638Z"
+      }
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "python3.9",
+      "region": "us-east-1",
+      "stage": "dev",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "AppLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/login-lambda-new-dev-app"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "login-lambda-new",
+                        "dev",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/login-lambda-new-dev*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/login-lambda-new-dev*:*:*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "login-lambda-new",
+                    "dev",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "AppLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-4b695180-4303",
+                "S3Key": "serverless/login-lambda-new/dev/1743913548638-2025-04-06T04:25:48.638Z/login-lambda-new.zip"
+              },
+              "Handler": "handler.handler",
+              "Runtime": "python3.9",
+              "FunctionName": "login-lambda-new-dev-app",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "AppLogGroup"
+            ]
+          },
+          "AppLambdaVersionwbeYqFPWHoYLLZI9t9u1wKpfVpq5R0wgncbkjNnw8": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AppLambdaFunction"
+              },
+              "CodeSha256": "GIY30f4ud9O0oL2FcivntKXdjHdI81xZyYd3QlojlMc="
+            }
+          },
+          "ApiGatewayRestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+              "Name": "dev-login-lambda-new",
+              "EndpointConfiguration": {
+                "Types": [
+                  "EDGE"
+                ]
+              },
+              "Policy": ""
+            }
+          },
+          "ApiGatewayResourceProxyVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "{proxy+}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodAny": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "ANY",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": "<REDACTED>",
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "AppLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "AppLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodProxyVarAny": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "ANY",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceProxyVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": "<REDACTED>",
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "AppLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "AppLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1743913540252": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "StageName": "dev"
+            },
+            "DependsOn": [
+              "ApiGatewayMethodAny",
+              "ApiGatewayMethodProxyVarAny"
+            ]
+          },
+          "AppLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "AppLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-1-4b695180-4303",
+            "Export": {
+              "Name": "sls-login-lambda-new-dev-ServerlessDeploymentBucketName"
+            }
+          },
+          "AppLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "AppLambdaVersionwbeYqFPWHoYLLZI9t9u1wKpfVpq5R0wgncbkjNnw8"
+            },
+            "Export": {
+              "Name": "sls-login-lambda-new-dev-AppLambdaFunctionQualifiedArn"
+            }
+          },
+          "ServiceEndpoint": {
+            "Description": "URL of the service endpoint",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  },
+                  "/dev"
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-login-lambda-new-dev-ServiceEndpoint"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "error": {
+      "message": "An error occurred: AppLambdaFunction - Resource handler returned message: \"Service returned error code AccessDeniedException (Service: Lambda, Status Code: 403, Request ID: 5f160725-c716-4c5b-b4da-2413666729a6) (SDK Attempt Count: 1)\" (RequestToken: f1b2f858-fb20-5699-3fb7-33510e2499fb, HandlerErrorCode: AccessDenied).",
+      "stack": "ServerlessError2: An error occurred: AppLambdaFunction - Resource handler returned message: \"Service returned error code AccessDeniedException (Service: Lambda, Status Code: 403, Request ID: 5f160725-c716-4c5b-b4da-2413666729a6) (SDK Attempt Count: 1)\" (RequestToken: f1b2f858-fb20-5699-3fb7-33510e2499fb, HandlerErrorCode: AccessDenied).\n    at file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:573:828\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async AwsDeploy.createFallback (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:573:23465)\n    at async aws:deploy:deploy:updateStack (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:584:7906)\n    at async PluginManager.runHooks (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:775:9546)\n    at async PluginManager.invoke (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:775:10315)\n    at async PluginManager.spawn (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:775:10674)\n    at async PluginManager.runHooks (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:775:9546)\n    at async PluginManager.invoke (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:775:10315)\n    at async PluginManager.run (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:775:11044)\n    at async Serverless.run (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:782:10520)\n    at async runFramework (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:809:1775)\n    at async TraditionalRunner.run (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:805:28308)\n    at async route (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:843:2779)\n    at async Object.run (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:844:3661)\n    at async run2 (file:///C:/Users/puppa/.serverless/releases/4.11.1/package/dist/sf-core.js:844:4814)",
+      "code": "AWS_CLOUD_FORMATION_CREATE_STACK_INTERNAL_LAMBDA_FUNCTION_CREATE_FAILED"
+    },
+    "serviceRawFile": "# \"org\" ensures this Service is used with the correct Serverless Framework Access Key.\r\norg: universityofnorthtexas1147\r\nservice: login-lambda-new\r\n\r\nprovider:\r\n  name: aws\r\n  runtime: python3.9\r\n  region: us-east-1\r\n\r\nfunctions:\r\n  app:\r\n    handler: handler.handler\r\n    events:\r\n      - http: ANY /\r\n      - http: ANY /{proxy+}\r\n\r\nplugins:\r\n  - serverless-python-requirements\r\n  - serverless-wsgi\r\n\r\ncustom:\r\n  wsgi:\r\n    app: handler.app\r\n  pythonRequirements:\r\n    pythonBin: python3.9\r\n\r\npackage:\r\n    exclude:\r\n      - .serverless/**\r\n      - node_modules/**        \r\n      - venv/**\r\n",
+    "command": [
+      "deploy"
+    ],
+    "options": {},
+    "orgId": "12e89127-01d5-459b-8711-66f43dcbc71c",
+    "orgName": "universityofnorthtexas1147",
+    "userId": "CjHclCvyRNmy01q5DB",
+    "userName": "universityofnorthtexas1147",
+    "serviceProviderAwsAccountId": "686255947123",
+    "serviceProviderAwsCfStackId": null,
+    "serviceProviderAwsCfStackCreated": null,
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": null,
+    "serviceProviderAwsCfStackOutputs": null
+  }
+}

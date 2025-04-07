@@ -1,0 +1,31 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: universityofnorthtexas1147
+service: login-lambda-new
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+
+functions:
+  app:
+    handler: handler.handler
+    events:
+      - http: ANY /
+      - http: ANY /{proxy+}
+
+plugins:
+  - serverless-python-requirements
+  - serverless-wsgi
+
+custom:
+  wsgi:
+    app: handler.app
+  pythonRequirements:
+    pythonBin: python3.9
+
+package:
+    exclude:
+      - .serverless/**
+      - node_modules/**        
+      - venv/**
